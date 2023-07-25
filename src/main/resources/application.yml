@@ -31,4 +31,5 @@ spring:
     host: localhost
     port: 6379
 
-jwt-secret-key: esdfDGEqwqrwDCvnulipQ
+access-jwt-secret-key: esdfDGEqwqrwDCvnulipQ
+refresh-jwt-secret-key: esdfDGEqwqrwDCvnulipQhsde

@@ -21,9 +21,11 @@ public class UserMapper {
                 .build();
     }
 
-    public LoginRespDto userToLoginRespDto(User user) {
+    public LoginRespDto userToLoginRespDto(User user, String accessToken, String refreshToken) {
         return LoginRespDto.builder()
                 .userId(user.getId())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 }

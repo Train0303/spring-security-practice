@@ -17,8 +17,8 @@ public class JoinDto {
     String email;
 
     @NotEmpty
-    @Size(min = 2, max = 8,
-            message = "2글자 이상 8글자 이하로 작성해주세요.")
+    @Size(min = 6, max = 12,
+            message = "6글자 이상 12글자 이하로 작성해주세요.")
     String username;
 
     @NotEmpty

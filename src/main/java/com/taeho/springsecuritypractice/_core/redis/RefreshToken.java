@@ -8,20 +8,18 @@ import org.springframework.data.redis.core.index.Indexed;
 import javax.persistence.Id;
 
 @Getter
-@RedisHash(value = "jwtToken", timeToLive = 60*60*24*7)
+@RedisHash(value = "refreshToken", timeToLive = 60*60*24*7)
 public class RefreshToken {
 
     @Id
     private String id;
-
-    private String refreshToken;
-
     private Long userId;
+    private String email;
 
     @Builder
-    public RefreshToken(String refreshToken, String id, Long userId) {
+    public RefreshToken(String id, Long userId, String email) {
         this.id = id;
-        this.refreshToken = refreshToken;
         this.userId = userId;
+        this.email = email;
     }
 }

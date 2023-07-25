@@ -1,9 +1,12 @@
 package com.taeho.springsecuritypractice.user;
 
+import com.taeho.springsecuritypractice._core.errors.exeption.Exception401;
+import com.taeho.springsecuritypractice._core.security.JwtProvider;
 import com.taeho.springsecuritypractice._core.utils.ApiUtils;
 import com.taeho.springsecuritypractice.user.dto.JoinDto;
 import com.taeho.springsecuritypractice.user.dto.LoginDto;
 import com.taeho.springsecuritypractice.user.dto.LoginRespDto;
+import com.taeho.springsecuritypractice.user.dto.ReissueRespDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -27,7 +31,6 @@ public class UserController {
     @PostMapping("/join")
     public ResponseEntity<?> join(@Valid @RequestBody JoinDto joinDto) {
         userService.join(joinDto);
-
         return new ResponseEntity<>(ApiUtils.success("ok"), HttpStatus.CREATED);
     }
 
@@ -35,6 +38,16 @@ public class UserController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginDto loginDto, HttpServletResponse response) {
         LoginRespDto loginRespDto = userService.login(loginDto, response);
         return new ResponseEntity<>(ApiUtils.success(loginRespDto), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = request.getHeader("refresh");
+        if(refreshToken == null) throw new Exception401("Refresh Token을 입력해주세요");
+
+        ReissueRespDto resultDto = userService.reissue(refreshToken);
+        response.setHeader(JwtProvider.HEADER, resultDto.getAccessToken());
+        return ResponseEntity.ok(ApiUtils.success(resultDto));
     }
 
     @GetMapping("/test")

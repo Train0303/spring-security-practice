@@ -20,12 +20,16 @@ public class JwtProvider {
     public static final String HEADER = "Authorization";
 
 
-    public static String SECRET;
+    public static String ACCESS_SECRET;
+    public static String REFRESH_SECRET;
 
-    @Value("${jwt-secret-key}")
-    public void setSECRET(String value) {
-        SECRET = value;
+    @Value("${access-jwt-secret-key}")
+    public void setACCESS_SECRET(String value) {
+        ACCESS_SECRET = value;
     }
+
+    @Value("${refresh-jwt-secret-key}")
+    public void setRefresh_Secret(String value) { REFRESH_SECRET = value; }
 
     public static String create(User user) {
         String jwt = JWT.create()
@@ -33,7 +37,7 @@ public class JwtProvider {
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXP))
                 .withClaim("id", user.getId())
                 .withClaim("role", user.getRoles())
-                .sign(Algorithm.HMAC512(SECRET));
+                .sign(Algorithm.HMAC512(ACCESS_SECRET));
         return TOKEN_PREFIX + jwt;
     }
 
@@ -42,13 +46,20 @@ public class JwtProvider {
                 .withSubject(user.getEmail())
                 .withExpiresAt(new Date(System.currentTimeMillis() + REFRESH_EXP))
                 .withClaim("id", user.getId())
-                .sign(Algorithm.HMAC512(SECRET));
+                .withClaim("role", user.getRoles())
+                .sign(Algorithm.HMAC512(REFRESH_SECRET));
         return jwt;
     }
 
     public static DecodedJWT verify(String jwt) throws SignatureVerificationException, TokenExpiredException {
         jwt = jwt.replace(TOKEN_PREFIX, "");
-        DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC512(SECRET))
+        DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC512(ACCESS_SECRET))
+                .build().verify(jwt);
+        return decodedJWT;
+    }
+
+    public static DecodedJWT verifyRefreshToken(String jwt) throws SignatureVerificationException, TokenExpiredException {
+        DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC512(REFRESH_SECRET))
                 .build().verify(jwt);
         return decodedJWT;
     }
