@@ -4,6 +4,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.taeho.springsecuritypractice._core.errors.exeption.Exception400;
 import com.taeho.springsecuritypractice._core.errors.exeption.Exception401;
 import com.taeho.springsecuritypractice._core.errors.exeption.Exception404;
+import com.taeho.springsecuritypractice._core.errors.exeption.Exception500;
 import com.taeho.springsecuritypractice._core.redis.RefreshTokenService;
 import com.taeho.springsecuritypractice._core.security.JwtProvider;
 import com.taeho.springsecuritypractice.user.dto.JoinDto;
@@ -49,7 +50,7 @@ public class UserService {
         try {
             String jwt = JwtProvider.create(user);
             String refreshToken = JwtProvider.createRefreshToken(user);
-            refreshTokenService.saveRefreshToken(refreshToken, user);
+            refreshTokenService.saveRefreshToken(refreshToken, jwt, user);
             response.setHeader(JwtProvider.HEADER, jwt);
             response.setHeader("refresh", refreshToken);
             return userMapper.userToLoginRespDto(user,jwt,refreshToken);
@@ -59,10 +60,26 @@ public class UserService {
         }
     }
 
+    public void logout(String accessToken) {
+        try {
+            refreshTokenService.deleteRefreshTokenByAccessToken(accessToken);
+        } catch(Exception e) {
+            System.out.println(e);
+            throw new Exception500("로그아웃 중 오류가 발생했습니다(Redis에러)");
+        }
+    }
+
+    @Transactional
     public ReissueRespDto reissue(String refreshToken) {
+        DecodedJWT decodedJWT;
+        try {
+            decodedJWT = JwtProvider.verifyRefreshToken(refreshToken);
+        } catch(Exception e) {
+            throw new Exception401(e.getMessage());
+        }
+
         if (!refreshTokenService.existRefreshToken(refreshToken)) throw new Exception404("Refresh Token Not Found");
 
-        DecodedJWT decodedJWT = JwtProvider.verifyRefreshToken(refreshToken);
         Long userId = decodedJWT.getClaim("id").asLong();
         String email = decodedJWT.getClaim("email").asString();
         String roles = decodedJWT.getClaim("role").asString();
@@ -75,6 +92,7 @@ public class UserService {
         refreshTokenService.deleteRefreshToken(refreshToken);
         String accessToken = JwtProvider.create(user);
         String newRefreshToken = JwtProvider.createRefreshToken(user);
+        refreshTokenService.saveRefreshToken(refreshToken, accessToken, user);
         return ReissueRespDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(newRefreshToken)

@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             return;
         }
 
-        if (jwt.startsWith("Bearer ")) {
+        if (!jwt.startsWith("Bearer ")) {
             log.error("잘못된 토큰");
             throw new JWTDecodeException("토큰 형식이 잘못되었습니다.");
         }

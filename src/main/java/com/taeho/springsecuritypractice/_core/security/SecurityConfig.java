@@ -65,6 +65,9 @@ public class SecurityConfig {
         // 폼 로그인 해제 (UsernamePasswordAuthenticationFilter 비활성화)
         http.formLogin().disable();
 
+        // 폼 로그아웃 해제
+        http.logout().disable();
+
         // 로그인 인증창 비활성화
         http.httpBasic().disable();
 
@@ -86,7 +89,7 @@ public class SecurityConfig {
 
         // 인증, 권한 필터 설정
         http.authorizeRequests(
-                authorize -> authorize.antMatchers("/test").authenticated()
+                authorize -> authorize.antMatchers("/test", "/logout").authenticated()
                         .anyRequest().permitAll());
 
         return http.build();

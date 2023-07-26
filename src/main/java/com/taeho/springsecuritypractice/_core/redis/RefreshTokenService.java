@@ -12,11 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
 
-    public void saveRefreshToken(String refreshToken, User user) {
+    public void saveRefreshToken(String refreshToken, String accessToken, User user) {
         refreshTokenRepository.save(RefreshToken.builder()
-                .id(refreshToken)
+                .refreshToken(refreshToken)
                 .userId(user.getId())
                 .email(user.getEmail())
+                .accessToken(accessToken)
                 .build());
     }
 
@@ -26,5 +27,10 @@ public class RefreshTokenService {
 
     public boolean existRefreshToken(String refreshToken) {
         return refreshTokenRepository.existsById(refreshToken);
+    }
+
+    public void deleteRefreshTokenByAccessToken(String accessToken) {
+        refreshTokenRepository.findByAccessToken(accessToken)
+                .ifPresent(refreshTokenRepository::delete);
     }
 }

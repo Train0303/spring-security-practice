@@ -50,6 +50,13 @@ public class UserController {
         return ResponseEntity.ok(ApiUtils.success(resultDto));
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String accessToken = request.getHeader(JwtProvider.HEADER);
+        userService.logout(accessToken);
+        return ResponseEntity.ok(ApiUtils.success(null));
+    }
+
     @GetMapping("/test")
     public String testAuthentication() {
         return "ok";
