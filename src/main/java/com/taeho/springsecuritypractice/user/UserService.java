@@ -34,32 +34,34 @@ public class UserService {
         });
 
         User user = userMapper.joinDtoToUser(joinDto);
-
-        userRepository.save(user);
+        try {
+            userRepository.save(user);
+        } catch(Exception e) {
+            throw new Exception500("회원 저장 중 문제가 발생했습니다. : " + e.getMessage());
+        }
     }
 
-    public LoginRespDto login(LoginDto loginDto, HttpServletResponse response) {
+    @Transactional
+    public LoginRespDto login(LoginDto loginDto) {
         User user = userRepository.findByEmail(loginDto.getEmail()).orElseThrow(
-                () -> new Exception400("존재하지 않는 이메일입니다.")
+                () -> new Exception404("존재하지 않는 이메일입니다.")
         );
 
         if(!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())){
             throw new Exception400("비밀번호가 일치하지 않습니다.");
         }
 
-        try {
-            String jwt = JwtProvider.create(user);
-            String refreshToken = JwtProvider.createRefreshToken(user);
-            refreshTokenService.saveRefreshToken(refreshToken, jwt, user);
-            response.setHeader(JwtProvider.HEADER, jwt);
-            response.setHeader("refresh", refreshToken);
-            return userMapper.userToLoginRespDto(user,jwt,refreshToken);
-        } catch(Exception e) {
-            System.out.println(e);
-            throw new Exception401("토큰 생성 실패");
-        }
+        String jwt = JwtProvider.create(user);
+        String refreshToken = JwtProvider.createRefreshToken(user);
+        refreshTokenService.saveRefreshToken(refreshToken, jwt, user);
+        return LoginRespDto.builder()
+                .userId(user.getId())
+                .refreshToken(refreshToken)
+                .accessToken(jwt)
+                .build();
     }
 
+    @Transactional
     public void logout(String accessToken) {
         try {
             refreshTokenService.deleteRefreshTokenByAccessToken(accessToken);
@@ -71,23 +73,14 @@ public class UserService {
 
     @Transactional
     public ReissueRespDto reissue(String refreshToken) {
-        DecodedJWT decodedJWT;
-        try {
-            decodedJWT = JwtProvider.verifyRefreshToken(refreshToken);
-        } catch(Exception e) {
-            throw new Exception401(e.getMessage());
-        }
+        DecodedJWT decodedJWT = getValidDecodedRefreshToken(refreshToken);
 
         if (!refreshTokenService.existRefreshToken(refreshToken)) throw new Exception404("Refresh Token Not Found");
 
         Long userId = decodedJWT.getClaim("id").asLong();
         String email = decodedJWT.getClaim("email").asString();
         String roles = decodedJWT.getClaim("role").asString();
-        User user = User.builder()
-                .id(userId)
-                .email(email)
-                .roles(roles)
-                .build();
+        User user = User.builder().id(userId).email(email).roles(roles).build();
 
         refreshTokenService.deleteRefreshToken(refreshToken);
         String accessToken = JwtProvider.create(user);
@@ -97,5 +90,15 @@ public class UserService {
                 .accessToken(accessToken)
                 .refreshToken(newRefreshToken)
                 .build();
+    }
+
+    // ------ private ------
+    private DecodedJWT getValidDecodedRefreshToken(String refreshToken) {
+        try {
+            return JwtProvider.verifyRefreshToken(refreshToken);
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+            throw new Exception400("토큰 검증에 실패했습니다.");
+        }
     }
 }

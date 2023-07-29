@@ -36,17 +36,21 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginDto loginDto, HttpServletResponse response) {
-        LoginRespDto loginRespDto = userService.login(loginDto, response);
+        LoginRespDto loginRespDto = userService.login(loginDto);
+        response.setHeader(JwtProvider.HEADER, loginRespDto.getAccessToken());
+        response.setHeader("refresh", loginRespDto.getRefreshToken());
         return new ResponseEntity<>(ApiUtils.success(loginRespDto), HttpStatus.CREATED);
     }
 
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = request.getHeader("refresh");
-        if(refreshToken == null) throw new Exception401("Refresh Token을 입력해주세요");
+        if(refreshToken == null || !refreshToken.startsWith("Refresh "))
+            throw new Exception401("Refresh 토큰을 입력해주세요.");
 
         ReissueRespDto resultDto = userService.reissue(refreshToken);
         response.setHeader(JwtProvider.HEADER, resultDto.getAccessToken());
+        response.setHeader("refresh", resultDto.getRefreshToken());
         return ResponseEntity.ok(ApiUtils.success(resultDto));
     }
 

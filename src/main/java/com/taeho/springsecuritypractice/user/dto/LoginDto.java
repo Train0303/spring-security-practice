@@ -1,5 +1,6 @@
 package com.taeho.springsecuritypractice.user.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 
 import javax.validation.constraints.Email;
@@ -19,5 +20,9 @@ public class LoginDto {
             message = "비밀번호는 영문과 특수문자 숫자를 포함하며 8자 이상 20자 이하이어야 합니다.")
     private String password;
 
-
+    @Builder
+    public LoginDto(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
 }

@@ -20,12 +20,4 @@ public class UserMapper {
                 .roles("ROLE_USER")
                 .build();
     }
-
-    public LoginRespDto userToLoginRespDto(User user, String accessToken, String refreshToken) {
-        return LoginRespDto.builder()
-                .userId(user.getId())
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
-    }
 }
