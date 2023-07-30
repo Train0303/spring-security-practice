@@ -70,7 +70,7 @@ public class UserService {
             blackListTokenService.save(accessToken);
         } catch(Exception e) {
             System.out.println(e);
-            throw new Exception500("로그아웃 중 오류가 발생했습니다(Redis에러)");
+            throw new Exception500("로그아웃 중 오류가 발생했습니다 : " + e.getMessage());
         }
     }
 

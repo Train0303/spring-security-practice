@@ -3,6 +3,7 @@ package com.taeho.springsecuritypractice.service;
 import com.taeho.springsecuritypractice._core.errors.exeption.Exception400;
 import com.taeho.springsecuritypractice._core.errors.exeption.Exception404;
 import com.taeho.springsecuritypractice._core.errors.exeption.Exception500;
+import com.taeho.springsecuritypractice._core.redis.BlackListTokenService;
 import com.taeho.springsecuritypractice._core.redis.RefreshTokenService;
 import com.taeho.springsecuritypractice._core.security.JwtProvider;
 import com.taeho.springsecuritypractice.user.User;
@@ -42,6 +43,9 @@ public class UserServiceTest {
     private UserRepository userRepository;
     @Mock
     private RefreshTokenService refreshTokenService;
+    @Mock
+    private BlackListTokenService blackListTokenService;
+
     @Mock
     private UserMapper userMapper;
 
@@ -182,20 +186,36 @@ public class UserServiceTest {
         assertEquals("Refresh 토큰 저장 중 레디스 데이터베이스에 문제가 발생했습니다.", e.getMessage());
     }
 
-    @DisplayName("로그아웃 테스트 실패: 레디스 에러")
+    @DisplayName("로그아웃 테스트 실패: Refresh 레디스 에러")
     @Test
-    public void user_logout_test_fail_redis_error() {
+    public void user_logout_test_fail_Refresh_redis_error() {
         // given
 
         // stub
-        doThrow(new RuntimeException("redis Error")).when(refreshTokenService)
+        doThrow(new RuntimeException("Refresh 토큰 저장 중 레디스 데이터베이스에 문제가 발생했습니다.")).when(refreshTokenService)
                 .deleteRefreshTokenByAccessToken(any());
 
         // when
         Exception result = assertThrows(Exception500.class, () -> userService.logout(any()));
 
         // then
-        assertEquals("로그아웃 중 오류가 발생했습니다(Redis에러)", result.getMessage());
+        assertEquals("로그아웃 중 오류가 발생했습니다 : Refresh 토큰 저장 중 레디스 데이터베이스에 문제가 발생했습니다.", result.getMessage());
+    }
+
+    @DisplayName("로그아웃 테스트 실패: BlackList 레디스 에러")
+    @Test
+    public void user_logout_test_fail_BlackList_redis_error() {
+        // given
+
+        // stub
+        doThrow(new RuntimeException("BlackList 저장 중 레디스 데이터베이스에 문제가 발생했습니다.")).when(blackListTokenService)
+                .save(any());
+
+        // when
+        Exception result = assertThrows(Exception500.class, () -> userService.logout(any()));
+
+        // then
+        assertEquals("로그아웃 중 오류가 발생했습니다 : BlackList 저장 중 레디스 데이터베이스에 문제가 발생했습니다.", result.getMessage());
     }
 
     @DisplayName("토큰 재발급 테스트")
