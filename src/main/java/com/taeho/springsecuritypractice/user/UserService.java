@@ -5,6 +5,7 @@ import com.taeho.springsecuritypractice._core.errors.exeption.Exception400;
 import com.taeho.springsecuritypractice._core.errors.exeption.Exception401;
 import com.taeho.springsecuritypractice._core.errors.exeption.Exception404;
 import com.taeho.springsecuritypractice._core.errors.exeption.Exception500;
+import com.taeho.springsecuritypractice._core.redis.BlackListTokenService;
 import com.taeho.springsecuritypractice._core.redis.RefreshTokenService;
 import com.taeho.springsecuritypractice._core.security.JwtProvider;
 import com.taeho.springsecuritypractice.user.dto.JoinDto;
@@ -25,6 +26,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final RefreshTokenService refreshTokenService;
+    private final BlackListTokenService blackListTokenService;
     private final UserMapper userMapper;
 
     @Transactional
@@ -65,6 +67,7 @@ public class UserService {
     public void logout(String accessToken) {
         try {
             refreshTokenService.deleteRefreshTokenByAccessToken(accessToken);
+            blackListTokenService.save(accessToken);
         } catch(Exception e) {
             System.out.println(e);
             throw new Exception500("로그아웃 중 오류가 발생했습니다(Redis에러)");
@@ -83,11 +86,11 @@ public class UserService {
         User user = User.builder().id(userId).email(email).roles(roles).build();
 
         refreshTokenService.deleteRefreshToken(refreshToken);
-        String accessToken = JwtProvider.create(user);
+        String newAccessToken = JwtProvider.create(user);
         String newRefreshToken = JwtProvider.createRefreshToken(user);
-        refreshTokenService.saveRefreshToken(refreshToken, accessToken, user);
+        refreshTokenService.saveRefreshToken(newRefreshToken, newAccessToken, user);
         return ReissueRespDto.builder()
-                .accessToken(accessToken)
+                .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .build();
     }

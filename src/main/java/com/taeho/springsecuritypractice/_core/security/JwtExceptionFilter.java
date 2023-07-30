@@ -42,4 +42,5 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         response.setStatus(e.status().value());
         response.getOutputStream().write(om.writeValueAsBytes(e.body()));
     }
+
 }

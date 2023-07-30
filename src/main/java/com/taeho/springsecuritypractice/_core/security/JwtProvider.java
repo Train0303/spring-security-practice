@@ -20,7 +20,6 @@ public class JwtProvider {
     public static final String REFRESH_TOKEN_PREFIX = "Refresh ";
     public static final String HEADER = "Authorization";
 
-
     public static String ACCESS_SECRET;
     public static String REFRESH_SECRET;
 
@@ -54,15 +53,20 @@ public class JwtProvider {
 
     public static DecodedJWT verify(String jwt) throws SignatureVerificationException, TokenExpiredException {
         jwt = jwt.replace(TOKEN_PREFIX, "");
-        DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC512(ACCESS_SECRET))
+        return JWT.require(Algorithm.HMAC512(ACCESS_SECRET))
                 .build().verify(jwt);
-        return decodedJWT;
     }
 
     public static DecodedJWT verifyRefreshToken(String jwt) throws SignatureVerificationException, TokenExpiredException {
         jwt = jwt.replace(REFRESH_TOKEN_PREFIX, "");
-        DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC512(REFRESH_SECRET))
+        return JWT.require(Algorithm.HMAC512(REFRESH_SECRET))
                 .build().verify(jwt);
-        return decodedJWT;
+    }
+
+    public static Long getRemainExpiration(String jwt) {
+        DecodedJWT decodedJTW = verify(jwt);
+        Date now = new Date();
+        Date end = decodedJTW.getExpiresAt();
+        return end.getTime() - now.getTime();
     }
 }

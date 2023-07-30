@@ -4,12 +4,10 @@ import com.taeho.springsecuritypractice._core.errors.exeption.Exception500;
 import com.taeho.springsecuritypractice.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 
 @RequiredArgsConstructor
 @Service
-@Transactional
 public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
 

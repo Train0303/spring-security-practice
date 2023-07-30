@@ -45,6 +45,7 @@ public class UserController {
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = request.getHeader("refresh");
+
         if(refreshToken == null || !refreshToken.startsWith("Refresh "))
             throw new Exception401("Refresh 토큰을 입력해주세요.");
 

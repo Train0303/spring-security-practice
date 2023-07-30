@@ -2,6 +2,7 @@ package com.taeho.springsecuritypractice._core.security;
 
 import com.taeho.springsecuritypractice._core.errors.exeption.Exception401;
 import com.taeho.springsecuritypractice._core.errors.exeption.Exception403;
+import com.taeho.springsecuritypractice._core.redis.BlackListTokenService;
 import com.taeho.springsecuritypractice._core.utils.FilterResponseUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class SecurityConfig {
 
+    private final BlackListTokenService blackListTokenService;
     private final JwtExceptionFilter jwtExceptionFilter;
     private final FilterResponseUtils filterResponseUtils;
 
@@ -42,7 +44,7 @@ public class SecurityConfig {
             AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
 
 //            builder.addFilter(new CustomUsernamePasswordAuthenticationFilter(authenticationManager));
-            builder.addFilter(new JwtAuthenticationFilter(authenticationManager));
+            builder.addFilter(new JwtAuthenticationFilter(authenticationManager, blackListTokenService));
             builder.addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
             super.configure(builder);
         }
