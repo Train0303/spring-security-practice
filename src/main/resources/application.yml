@@ -33,3 +33,9 @@ spring:
 
 access-jwt-secret-key: esdfDGEqwqrwDCvnulipQ
 refresh-jwt-secret-key: esdfDGEqwqrwDCvnulipQhsde
+
+oauth:
+  kakao:
+    client-id: ${KAKAO_CLIENT_ID}
+    secret: ${KAKAO_SECRET}
+    redirect: http://localhost:8080/auth/kakao/login/redirect
