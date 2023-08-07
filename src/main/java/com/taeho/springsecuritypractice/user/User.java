@@ -28,12 +28,16 @@ public class User {
     @Column(length = 30)
     private String roles;
 
+    @Column(length = 30)
+    private String provider;
+
     @Builder
-    public User(Long id, String username, String email, String password, String roles) {
+    public User(Long id, String username, String email, String password, String roles, String provider) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
         this.roles = roles;
+        this.provider = provider == null ? "normal" : provider;
     }
 }

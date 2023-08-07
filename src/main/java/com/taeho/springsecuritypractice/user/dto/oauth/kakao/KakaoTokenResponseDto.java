@@ -1,4 +1,4 @@
-package com.taeho.springsecuritypractice.user.dto;
+package com.taeho.springsecuritypractice.user.dto.oauth.kakao;
 
 import lombok.Builder;
 import lombok.Getter;

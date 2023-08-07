@@ -3,7 +3,7 @@ package com.taeho.springsecuritypractice.user.controller;
 import com.taeho.springsecuritypractice._core.errors.exeption.Exception401;
 import com.taeho.springsecuritypractice._core.security.JwtProvider;
 import com.taeho.springsecuritypractice._core.utils.ApiUtils;
-import com.taeho.springsecuritypractice.user.UserService;
+import com.taeho.springsecuritypractice.user.service.UserService;
 import com.taeho.springsecuritypractice.user.dto.JoinDto;
 import com.taeho.springsecuritypractice.user.dto.LoginDto;
 import com.taeho.springsecuritypractice.user.dto.LoginRespDto;
@@ -11,7 +11,6 @@ import com.taeho.springsecuritypractice.user.dto.ReissueRespDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 

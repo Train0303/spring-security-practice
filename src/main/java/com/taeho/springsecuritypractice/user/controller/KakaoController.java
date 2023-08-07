@@ -3,10 +3,12 @@ package com.taeho.springsecuritypractice.user.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taeho.springsecuritypractice._core.errors.exeption.Exception400;
-import com.taeho.springsecuritypractice.user.UserService;
-import com.taeho.springsecuritypractice.user.dto.KakaoAccessTokenDto;
-import com.taeho.springsecuritypractice.user.dto.KakaoTokenResponseDto;
-import com.taeho.springsecuritypractice.user.dto.KakaoUserInfoDto;
+import com.taeho.springsecuritypractice._core.security.JwtProvider;
+import com.taeho.springsecuritypractice.user.dto.LoginRespDto;
+import com.taeho.springsecuritypractice.user.service.OauthUserService;
+import com.taeho.springsecuritypractice.user.service.UserService;
+import com.taeho.springsecuritypractice.user.dto.oauth.kakao.KakaoTokenResponseDto;
+import com.taeho.springsecuritypractice.user.dto.oauth.kakao.KakaoUserInfoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -34,7 +36,7 @@ public class KakaoController {
     @Value("${oauth.kakao.secret}")
     private String secret;
 
-    private final UserService userService;
+    private final OauthUserService oauthUserService;
     private final ObjectMapper om;
 
     @GetMapping("/login")
@@ -69,7 +71,7 @@ public class KakaoController {
     }
 
     @PostMapping("/api/login")
-    public ResponseEntity<?> serverLogin(HttpServletRequest request) {
+    public ResponseEntity<?> kakaoLogin(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
         String accessToken = request.getHeader("Kakao");
         if(accessToken == null || !accessToken.startsWith("kakao ")) {
             throw new Exception400("카카오 accessToken을 입력해주세요.");
@@ -80,17 +82,15 @@ public class KakaoController {
         // 이메일만 필요하기 때문에 아래 링크를 사용
         String getUserMeUrl = "https://kapi.kakao.com/v2/user/me?property_keys=[\"kakao_account.email\"]";
         RestTemplate restTemplate = new RestTemplate();
-        try{
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + accessToken);
-            HttpEntity<?> httpRequestEntity = new HttpEntity<>(headers);
-            ResponseEntity<String> response = restTemplate.exchange(getUserMeUrl, HttpMethod.GET, httpRequestEntity, String.class);
-            KakaoUserInfoDto kakaoUserInfoDto = om.readValue(response.getBody(), KakaoUserInfoDto.class);
-            System.out.println(kakaoUserInfoDto);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+        HttpEntity<?> httpRequestEntity = new HttpEntity<>(headers);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(getUserMeUrl, HttpMethod.GET, httpRequestEntity, String.class);
+        KakaoUserInfoDto kakaoUserInfoDto = om.readValue(responseEntity.getBody(), KakaoUserInfoDto.class);
 
-        return ResponseEntity.ok("ok");
+        LoginRespDto result = oauthUserService.oauthLogin(kakaoUserInfoDto);
+        response.setHeader(JwtProvider.HEADER, result.getAccessToken());
+        response.setHeader("refresh", result.getRefreshToken());
+        return ResponseEntity.ok(result);
     }
 }

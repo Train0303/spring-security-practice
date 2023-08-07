@@ -9,7 +9,7 @@ import com.taeho.springsecuritypractice._core.security.JwtProvider;
 import com.taeho.springsecuritypractice.user.User;
 import com.taeho.springsecuritypractice.user.UserMapper;
 import com.taeho.springsecuritypractice.user.UserRepository;
-import com.taeho.springsecuritypractice.user.UserService;
+import com.taeho.springsecuritypractice.user.service.UserService;
 import com.taeho.springsecuritypractice.user.dto.JoinDto;
 import com.taeho.springsecuritypractice.user.dto.LoginDto;
 import com.taeho.springsecuritypractice.user.dto.LoginRespDto;

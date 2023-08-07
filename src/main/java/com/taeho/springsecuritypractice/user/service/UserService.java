@@ -1,4 +1,4 @@
-package com.taeho.springsecuritypractice.user;
+package com.taeho.springsecuritypractice.user.service;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.taeho.springsecuritypractice._core.errors.exeption.Exception400;
@@ -8,6 +8,9 @@ import com.taeho.springsecuritypractice._core.errors.exeption.Exception500;
 import com.taeho.springsecuritypractice._core.redis.BlackListTokenService;
 import com.taeho.springsecuritypractice._core.redis.RefreshTokenService;
 import com.taeho.springsecuritypractice._core.security.JwtProvider;
+import com.taeho.springsecuritypractice.user.User;
+import com.taeho.springsecuritypractice.user.UserMapper;
+import com.taeho.springsecuritypractice.user.UserRepository;
 import com.taeho.springsecuritypractice.user.dto.JoinDto;
 import com.taeho.springsecuritypractice.user.dto.LoginDto;
 import com.taeho.springsecuritypractice.user.dto.LoginRespDto;

@@ -1,5 +1,6 @@
-package com.taeho.springsecuritypractice.user.dto;
+package com.taeho.springsecuritypractice.user.dto.oauth.kakao;
 
+import com.taeho.springsecuritypractice.user.dto.oauth.OauthUserInfoDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
@@ -7,7 +8,8 @@ import lombok.ToString;
 import java.time.LocalDateTime;
 
 @Getter @ToString
-public class KakaoUserInfoDto {
+public class KakaoUserInfoDto implements OauthUserInfoDto {
+    private final String provider = "kakao";
     private Long id;
     private LocalDateTime connected_at;
     private KakaoAccount kakao_account;
@@ -36,4 +38,12 @@ public class KakaoUserInfoDto {
             this.email = email;
         }
     }
+    @Override
+    public String email() { return this.kakao_account.email; }
+
+    @Override
+    public String provider() { return this.provider; }
+
+    @Override
+    public Long id() { return this.id; }
 }
